@@ -14,37 +14,23 @@ from torchvision.transforms import ToTensor
 
 
 class CloudDataset(Dataset):
-    CLASS_NAMES = ["dog", "horse", "elephant", "cat", "cow"]
-    #["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
-    INV_CLASS = {}
-    for i in range(len(CLASS_NAMES)):
-        INV_CLASS[CLASS_NAMES[i]] = i
 
     # TODO Q1.2: Adjust data_dir according to where **you** stored the data
-    def __init__(self, split, size, data_dir='../data/', analysis=False):
+    def __init__(self, img_dir="", size=512):
         super().__init__()
-        self.split = split
-        self.analysis = analysis
-        self.data_dir = data_dir
+        self.img_dir = img_dir
         self.size = size
-        # self.img_dir = os.path.join(data_dir, 'JPEGImages')
-        self.ann_dir = os.path.join(data_dir, 'Annotations')
 
-        split_file = os.path.join(data_dir, 'ImageSets/Main', split + '.txt')
-        with open(split_file) as fp:
-            self.index_list = [line.strip() for line in fp]
+        self.filenames = [f for f in os.listdir(self.img_dir) if f.isfile()]
 
-    @classmethod
-    def get_class_name(cls, index):
-        return cls.CLASS_NAMES[index]
-
-    @classmethod
-    def get_class_index(cls, name):
-        return cls.INV_CLASS[name]
-
+        self.class_names = ["dog", "horse", "elephant", "cat", "cow", "sheep"]
+        #["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
+        self.inv_class = {}
+        for i in range(len(self.class_names)):
+            self.inv_class[self.class_names[i]] = i
+    
     def __len__(self):
-        return len(self.index_list)
-
+        return len(self.filenames)
 
     def __getitem__(self, index):
         """
@@ -54,31 +40,17 @@ class CloudDataset(Dataset):
         label: LongTensor in shape of (Nc, ) binary label
         weight: FloatTensor in shape of (Nc, ) difficult or not.
         """
-        findex = self.index_list[index]
-        fpath = os.path.join(self.img_dir, findex + '.jpg')
-        # TODO Q1.2: insert your code here. hint: read image, find the labels and weight.
-
+        fpath = self.filenames[index]
         image = Image.open(fpath)
 
-        if self.split == 'train':
-            transform = transforms.Compose(
-            [transforms.Resize([self.size, self.size]),
-             transforms.ToTensor(),
-            #  transforms.RandomHorizontalFlip(p=0.5),
-             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-            #  transforms.RandomRotation(45)
-             ])
-            
-        elif self.split == 'test':
-            transform = transforms.Compose(
-            [transforms.Resize([self.size, self.size]),
+        transform = transforms.Compose([
+            transforms.Resize([self.size, self.size]),
             transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-            ])
+            # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        ])
+        class_name = fpath.split("/")[-1].split("_")[1]
+        print(f"class: {class_name}, {self.inv_class[class_name]}")
+        class_label = self.inv_class[class_name]
+        image = transform(image)
 
-        img = transform(image)
-
-        image = torch.FloatTensor(img)
-
-
-        return image
+        return image, class_label

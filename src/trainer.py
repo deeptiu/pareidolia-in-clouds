@@ -9,6 +9,7 @@ import utils
 from cloud_dataset import CloudDataset
 
 
+
 def save_this_epoch(args, epoch):
     if args.save_freq > 0 and (epoch+1) % args.save_freq == 0:
         return True
@@ -28,68 +29,49 @@ def save_model(epoch, model_name, optimizer, model):
             }, "saved_models/"+filename)
 
 
-def train(args, model, optimizer, scheduler=None, model_name='model'):
-    # TODO Q1.5: Initialize your tensorboard writer here!
-    writer = SummaryWriter()
-    train_loader = utils.get_data_loader(
-        'cloud', train=True, batch_size=args.batch_size, split='trainval', inp_size=args.inp_size)
-    test_loader = utils.get_data_loader(
-        'cloud', train=False, batch_size=args.test_batch_size, split='test', inp_size=args.inp_size)
+def train(model, optimizer, criterion, scheduler=None, model_name='model'):
+    
+    epochs = 10
 
-    # Ensure model is in correct mode and on right device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.train()
-    model = model.to(args.device)
+    model = model.to(device)
+
+
+    train_dataset = CloudDataset("", size=512)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=2, shuffle=True)
 
     cnt = 0
-    for epoch in range(args.epochs):
-        for batch_idx, (data, target, wgt) in enumerate(train_loader):
-            # Get a batch of data
-#             import pdb; pdb.set_trace()
-            data, target, wgt = data.to(args.device), target.to(args.device), wgt.to(args.device)
-#             print(wgt.shape)
+    for epoch in range(epochs):
+        total_images = 0
+        total_correct = 0
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data, target = data.to(device), target.to(device)
+
+            total_images += len(data)
+
             optimizer.zero_grad()
     
             # Forward pass
             output = model(data)
-            # Calculate the loss
-            # TODO Q1.4: your loss for multi-label classification
-            loss = torch.nn.functional.binary_cross_entropy_with_logits(output, target, weight=wgt).to(args.device)
+            output_labels = torch.argmax(output, dim=1)
 
-            # Calculate gradient w.r.t the loss
+            total_correct += torch.eq(output_labels, target).sum()
+
+            loss = criterion(output, target)
+
             loss.backward()
-            # Optimizer takes one step
             optimizer.step()
-            # Log info
-            if cnt % args.log_every == 0:
-                # TODO Q1.5: Log training loss to tensorboard
-                print('Train Epoch: {} [{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, cnt, 100. * batch_idx / len(train_loader), loss.item()))
-                # writer.add_scalar('Loss', loss.item(), cnt)
 
-            # Validation iteration
-            if cnt % args.val_every == 0:
-                model.eval()
-                ap, mAP = utils.eval_dataset_map(model, args.device, test_loader)
-                print(mAP)
-                # TODO Q1.5: Log MAP to tensorboard
-                # writer.add_scalar('Mean Average Precision', mAP, cnt)
-                
-                model.train()
-            cnt += 1
+            print(f"EPOCH: {epoch}, BATCH: {batch_idx}, LOSS: {loss.item()}")
 
-        # TODO Q3.2: Log Learning rate
-        if scheduler is not None:
-            scheduler.step()
-            lr = optimizer.param_groups[0]['lr']
-            # writer.add_scalar('Learning Rate', lr, cnt)
-
-        # save model
-        if save_this_epoch(args, epoch):
-            save_model(epoch, model_name, optimizer, model)
+            # if scheduler is not None:
+            #     scheduler.step()
+            #     lr = optimizer.param_groups[0]['lr']
+            #     # writer.add_scalar('Learning Rate', lr, cnt)
             
-    writer.close()
-    
-    # Validation iteration
-    test_loader = utils.get_data_loader('cloud', train=False, batch_size=args.test_batch_size, split='test', inp_size=args.inp_size)
-    ap, map = utils.eval_dataset_map(model, args.device, test_loader)
-    return ap, map
+        train_accuracy = total_correct / total_images
+        print(f"EPOCH: {epoch}, ACCURACY: {train_accuracy}")
+        
+        # save model
+        save_model(epoch, model_name, optimizer, model)
