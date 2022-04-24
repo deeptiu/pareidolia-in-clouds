@@ -33,8 +33,6 @@ class CloudDataset(Dataset):
         with open(split_file) as fp:
             self.index_list = [line.strip() for line in fp]
 
-        self.anno_list = self.preload_anno()
-
     @classmethod
     def get_class_name(cls, index):
         return cls.CLASS_NAMES[index]
@@ -46,36 +44,6 @@ class CloudDataset(Dataset):
     def __len__(self):
         return len(self.index_list)
 
-    def preload_anno(self):
-        """
-        :return: a list of labels. each element is in the form of [class, weight],
-         where both class and weight are a numpy array in shape of [20],
-        """
-        label_list = []
-        for index in self.index_list:
-#             print(index)
-            fpath = os.path.join(self.ann_dir, index + '.xml')
-            tree = ET.parse(fpath)
-            # TODO Q1.2: insert your code here, preload labels
-            
-            root = tree.getroot()
-            label = np.zeros(20)
-            weight = np.ones(20)
-            
-            for child in root:
-                if child.tag == 'object':
-                    assert child[0].tag == 'name'
-                    name = child[0].text
-                    label[self.CLASS_NAMES.index(name)] = 1
-                    assert child[3].tag == 'difficult'
-                    difficult = int(child[3].text)
-                    
-                    if difficult == 1:
-                        weight[self.CLASS_NAMES.index(name)] = 0
-                        
-            label_list.append([label, weight])
-
-        return label_list
 
     def __getitem__(self, index):
         """
@@ -94,38 +62,22 @@ class CloudDataset(Dataset):
         if self.split == 'trainval':
             transform = transforms.Compose(
             [transforms.Resize([self.size, self.size]),
-            #  transforms.RandomVerticalFlip(p=0.1), 
-            #  transforms.RandomAutocontrast(p=0.5),
-            #  transforms.Resize(int(self.size * (256/224))),
-            #  transforms.CenterCrop(self.size),
              transforms.ToTensor(),
              transforms.RandomHorizontalFlip(p=0.5),
-#              transforms.RandomCrop(10),
              transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
              transforms.RandomRotation(45)
-#             transforms.RandomVerticalFlip(p=0.5),
              ])
             
         elif self.split == 'test':
             transform = transforms.Compose(
             [transforms.Resize([self.size, self.size]),
             transforms.ToTensor(),
-            # transforms.Resize(int(self.size * 1.1428)), 
-            # transforms.CenterCrop(self.size),
-#              transforms.CenterCrop(10),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             ])
 
         img = transform(image)
-#         img = torch.transpose(img, 1, 2)
-#         img = ToTensor()(image).unsqueeze(0)
-        lab_vec, wgt_vec = self.anno_list[index]
 
         image = torch.FloatTensor(img)
-        label = torch.FloatTensor(lab_vec)
-        wgt = torch.FloatTensor(wgt_vec)
 
-        if self.analysis:
-          return img, label, fpath
 
-        return image, label, wgt
+        return image
