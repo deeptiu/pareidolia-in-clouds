@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import torch
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 
 import utils
@@ -31,14 +30,14 @@ def save_model(epoch, model_name, optimizer, model):
 
 def train(model, optimizer, criterion, scheduler=None, model_name='model'):
     
-    epochs = 10
+    epochs = 2
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.train()
     model = model.to(device)
 
 
-    train_dataset = CloudDataset("", size=512)
+    train_dataset = CloudDataset("images/", size=512)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=2, shuffle=True)
 
     cnt = 0
@@ -72,6 +71,6 @@ def train(model, optimizer, criterion, scheduler=None, model_name='model'):
             
         train_accuracy = total_correct / total_images
         print(f"EPOCH: {epoch}, ACCURACY: {train_accuracy}")
-        
+
         # save model
         save_model(epoch, model_name, optimizer, model)

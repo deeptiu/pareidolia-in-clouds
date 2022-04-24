@@ -1,6 +1,4 @@
 from __future__ import print_function
-
-import imageio
 import numpy as np
 import os
 import xml.etree.ElementTree as ET
@@ -21,7 +19,8 @@ class CloudDataset(Dataset):
         self.img_dir = img_dir
         self.size = size
 
-        self.filenames = [f for f in os.listdir(self.img_dir) if f.isfile()]
+        self.filenames = [os.path.join(self.img_dir, f) for f in os.listdir(self.img_dir)]
+        print(self.filenames)
 
         self.class_names = ["dog", "horse", "elephant", "cat", "cow", "sheep"]
         #["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
@@ -48,7 +47,7 @@ class CloudDataset(Dataset):
             transforms.ToTensor(),
             # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
-        class_name = fpath.split("/")[-1].split("_")[1]
+        class_name = fpath.split("/")[-1].split("_")[1].split(".")[0]
         print(f"class: {class_name}, {self.inv_class[class_name]}")
         class_label = self.inv_class[class_name]
         image = transform(image)
