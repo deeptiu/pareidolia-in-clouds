@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import torchvision.models as models
 
+from matplotlib.image import imsave
+
 import copy
 
 def set_cuda_device(device_num=-1):

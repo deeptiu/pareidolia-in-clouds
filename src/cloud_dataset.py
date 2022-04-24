@@ -14,19 +14,20 @@ from torchvision.transforms import ToTensor
 
 
 class CloudDataset(Dataset):
-    CLASS_NAMES = ["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
+    CLASS_NAMES = ["dog", "horse", "elephant", "cat", "cow"]
+    #["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
     INV_CLASS = {}
     for i in range(len(CLASS_NAMES)):
         INV_CLASS[CLASS_NAMES[i]] = i
 
     # TODO Q1.2: Adjust data_dir according to where **you** stored the data
-    def __init__(self, split, size, data_dir='VOCdevkit/VOC2007/', analysis=False):
+    def __init__(self, split, size, data_dir='../data/', analysis=False):
         super().__init__()
         self.split = split
         self.analysis = analysis
         self.data_dir = data_dir
         self.size = size
-        self.img_dir = os.path.join(data_dir, 'JPEGImages')
+        # self.img_dir = os.path.join(data_dir, 'JPEGImages')
         self.ann_dir = os.path.join(data_dir, 'Annotations')
 
         split_file = os.path.join(data_dir, 'ImageSets/Main', split + '.txt')
@@ -59,13 +60,13 @@ class CloudDataset(Dataset):
 
         image = Image.open(fpath)
 
-        if self.split == 'trainval':
+        if self.split == 'train':
             transform = transforms.Compose(
             [transforms.Resize([self.size, self.size]),
              transforms.ToTensor(),
-             transforms.RandomHorizontalFlip(p=0.5),
+            #  transforms.RandomHorizontalFlip(p=0.5),
              transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-             transforms.RandomRotation(45)
+            #  transforms.RandomRotation(45)
              ])
             
         elif self.split == 'test':

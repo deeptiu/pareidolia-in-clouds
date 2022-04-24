@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import trainer
 from utils import ARGS
 from simple_cnn import SimpleCNN
-from voc_dataset import VOCDataset
+from cloud_dataset import CloudDataset
 
 
 # Pre-trained weights up to second-to-last layer

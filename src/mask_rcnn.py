@@ -392,7 +392,7 @@ class_to_label_map = {v:k for k, v in enumerate(COCO_INSTANCE_CATEGORY_NAMES)}
 start = time.time()
 
 
-class_map = {"dog": "cane", "elephant": "elefante", "chicken": "gallina", "cat": "gatto", "cow": "mucca", "horse":"cavallo"}
+class_map = {"dog": "cane", "elephant": "elefante", "chicken": "gallina", "cat": "gatto", "cow": "mucca", "horse":"cavallo", "sheep":"pecora"}
 
 def create_cloud_images_by_class(class_name, data_path):
     working_directory = f"{data_path}/raw-img/{class_map[class_name]}"
@@ -400,15 +400,16 @@ def create_cloud_images_by_class(class_name, data_path):
     for i, f in enumerate(os.listdir(working_directory)):
         if i > 600:
             break
-        image_path = os.path.join(working_directory, f)
-        sky_path = os.path.join(data_path, f"sky/{np.random.randint(4, 9)}.jpeg")
-        save_path = os.path.join(f'data/created-images/{i}_{class_name}.jpeg')
-        do_style_transfer(model, class_name, image_path, sky_path, save_path, label_to_class_map, cnn, cnn_normalization_mean, cnn_normalization_std)
-        print(f"TOTAL TIME: {time.time() - start}s")
+        if i > 151:
+            image_path = os.path.join(working_directory, f)
+            sky_path = os.path.join(data_path, f"sky/{np.random.randint(4, 9)}.jpeg")
+            save_path = os.path.join(f'cloud-data/created-images/{i}_{class_name}.jpeg')
+            do_style_transfer(model, class_name, image_path, sky_path, save_path, label_to_class_map, cnn, cnn_normalization_mean, cnn_normalization_std)
+            print(f"TOTAL TIME: {time.time() - start}s")
 
-class_name = 'dog'
+class_name = 'sheep'
 try:
-    os.makedirs(f'data/created-images')
+    os.makedirs(f'cloud-data/created-images')
 except:
     pass
 create_cloud_images_by_class(class_name, '../../cloud_patterns')
