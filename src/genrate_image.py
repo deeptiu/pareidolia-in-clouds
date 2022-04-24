@@ -48,12 +48,12 @@ if __name__ == "__main__":
     imsize = 512 if torch.cuda.is_available() else 128  # use small size if no gpu
 
     translate = {"cane": "dog", "cavallo": "horse", "elefante": "elephant", 
-                "farfalla": "butterfly", "gallina": "chicken", "gatto": "cat", 
-                "mucca": "cow", "pecora": "sheep", "ragno": "spider", "scoiattolo": "squirrel", 
-                "dog": "cane", "cavallo": "horse", "elephant" : "elefante", 
-                "butterfly": "farfalla", "chicken": "gallina", "cat": "gatto", 
-                "cow": "mucca", "spider": "ragno", "squirrel": "scoiattolo"}
-
+            "farfalla": "butterfly", "gallina": "chicken", "gatto": "cat", 
+            "mucca": "cow", "pecora": "sheep", "ragno": "spider", "scoiattolo": "squirrel", 
+            "dog": "cane", "horse": "cavallo", "elephant" : "elefante", 
+            "butterfly": "farfalla", "chicken": "gallina", "cat": "gatto", 
+            "cow": "mucca", "spider": "ragno", "squirrel": "scoiattolo", "sheep": "pecora"}
+            
     data_path = "raw-img/"
     save_path = "generated_data/"
     style_filename = "./data/cloud.jpeg"
