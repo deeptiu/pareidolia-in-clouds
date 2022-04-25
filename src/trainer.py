@@ -89,4 +89,4 @@ def validate(model):
         data = data.to(device)
         output = model(data)
         output_labels = torch.argmax(output, dim=1)
-        print (output_labels)
+        print ("Class Predicted ", test_dataset.class_names[output_labels], "\n Class label ", output_labels)

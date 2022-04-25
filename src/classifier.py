@@ -35,7 +35,8 @@ class PretrainedResNet(nn.Module):
 # args.gamma = 0.4
 # print(args)
 
-lr = 1e-5
+lr = 1e-4
+
 
 model = PretrainedResNet()
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -43,4 +44,4 @@ criterion = torch.nn.CrossEntropyLoss()
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
 trainer.train(model, optimizer, criterion, model_name='cloud')
 
-# trainer.validate(model)
+trainer.validate(model)
