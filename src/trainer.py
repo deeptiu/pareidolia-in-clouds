@@ -30,7 +30,7 @@ def save_model(epoch, model_name, optimizer, model):
 
 def train(model, optimizer, criterion, scheduler=None, model_name='model'):
     
-    epochs = 2
+    epochs = 5
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.train()
@@ -55,7 +55,7 @@ def train(model, optimizer, criterion, scheduler=None, model_name='model'):
             output = model(data)
             output_labels = torch.argmax(output, dim=1)
 
-            total_correct += torch.eq(output_labels, target).sum()
+            total_correct += torch.eq(output_labels, target).sum().item()
 
             loss = criterion(output, target)
 
@@ -68,9 +68,25 @@ def train(model, optimizer, criterion, scheduler=None, model_name='model'):
             #     scheduler.step()
             #     lr = optimizer.param_groups[0]['lr']
             #     # writer.add_scalar('Learning Rate', lr, cnt)
-            
+
+        print (total_images, total_correct)
         train_accuracy = total_correct / total_images
         print(f"EPOCH: {epoch}, ACCURACY: {train_accuracy}")
 
         # save model
         save_model(epoch, model_name, optimizer, model)
+
+
+def validate(model):
+    model.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    test_dataset = CloudDataset("test_images/", size=512, split="test")
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
+
+    for batch_idx, data in enumerate(test_loader):
+        data = data.to(device)
+        output = model(data)
+        output_labels = torch.argmax(output, dim=1)
+        print (output_labels)

@@ -14,16 +14,16 @@ from torchvision.transforms import ToTensor
 class CloudDataset(Dataset):
 
     # TODO Q1.2: Adjust data_dir according to where **you** stored the data
-    def __init__(self, img_dir="", size=512):
+    def __init__(self, img_dir="", size=512, split="train"):
         super().__init__()
         self.img_dir = img_dir
         self.size = size
+        self.split = split
 
-        self.filenames = [os.path.join(self.img_dir, f) for f in os.listdir(self.img_dir)]
+        self.filenames = [os.path.join(self.img_dir, f) for f in os.listdir(self.img_dir) if ".DS" not in f]
         print(self.filenames)
 
-        self.class_names = ["dog", "horse", "elephant", "cat", "cow", "sheep"]
-        #["dog", "horse", "elephant", "butterfly", "chicken", "cat", "cow", "spider", "squirrel"]
+        self.class_names = ["dog", "horse", "elephant", "cat", "sheep"]
         self.inv_class = {}
         for i in range(len(self.class_names)):
             self.inv_class[self.class_names[i]] = i
@@ -41,15 +41,21 @@ class CloudDataset(Dataset):
         """
         fpath = self.filenames[index]
         image = Image.open(fpath)
+        # print (image)
+        # image = image.convert("RGB")
 
         transform = transforms.Compose([
+            # transforms.Grayscale(3),
             transforms.Resize([self.size, self.size]),
             transforms.ToTensor(),
-            # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
-        class_name = fpath.split("/")[-1].split("_")[1].split(".")[0]
-        print(f"class: {class_name}, {self.inv_class[class_name]}")
-        class_label = self.inv_class[class_name]
         image = transform(image)
-
-        return image, class_label
+        # print (torch.unique(image))
+        # print (image.shape)
+        if self.split == "train":
+            class_name = fpath.split("/")[-1].split("_")[1].split(".")[0]
+            # print(f"class: {class_name}, {self.inv_class[class_name]}")
+            class_label = self.inv_class[class_name]
+            return image, class_label
+        else:
+            return image
