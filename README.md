@@ -16,7 +16,7 @@ git clone https://github.com/deeptiu/pareidolia-in-clouds.git
 cd src
 python mask_rcnn_style_transfer.py
 ```
-4. Collect all the CLipasso output images to this folder 
+4. Collect all the CLipasso output images to this folder (pareidolia-in-clouds) 
 5. Run the script to convert svg images to pngs 
 ```bash
 sh scan_and_convert.py 
