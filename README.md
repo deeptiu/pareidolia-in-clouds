@@ -10,13 +10,19 @@ Steps to obtain the classification results.
 ```bash
 git clone https://github.com/deeptiu/pareidolia-in-clouds.git
 ```
-2. Collect all the CLipasso output images to this folder 
-3. Run the script to convert svg images to pngs 
+2. Download the Animals-10 dataset from Kaggle https://www.kaggle.com/datasets/alessiocorrado99/animals10 and place under src/. This folder should be named `raw-img`.
+3. Run the script to create style transferred images:
+```bash
+cd src
+python mask_rcnn_style_transfer.py
+```
+4. Collect all the CLipasso output images to this folder 
+5. Run the script to convert svg images to pngs 
 ```bash
 sh scan_and_convert.py 
 ```
-4. For training copy the images to `src/images` and for testing copy the images to `src/test_images`
-5. Run the classifier to train/test 
+6. For training copy the images to `src/images` and for testing copy the images to `src/test_images`
+7. Run the classifier to train/test 
 ```bash
 python src/classifier.py 
 ```
